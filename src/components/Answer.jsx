@@ -4,8 +4,8 @@ const Answer = ({ data, onAnswerClick }) => {
   // logic
   const { answerList } = data;
 
-  const handleClick = () => {
-    onAnswerClick();
+  const handleClick = (answer) => {
+    onAnswerClick(answer);
   };
 
   // view
@@ -16,9 +16,9 @@ const Answer = ({ data, onAnswerClick }) => {
           <button
             type="button"
             className="block w-full p-4 rounded-xl bg-white border-2 border-black"
-            onClick={handleClick}
+            onClick={() => handleClick(answer)}
           >
-            {answer.text}
+            {answer.text} {answer.type}
           </button>
         </div>
       ))}

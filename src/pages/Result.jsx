@@ -1,11 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { IoMdRefresh, IoMdShareAlt } from "react-icons/io";
 import Score from "../components/Score";
 import LoveIndex from "../components/LoveIndex";
 import ResultMessage from "../components/ResultMessage";
+import { mbtiResultDataList } from "../data/response";
+import { initialMbtiResultData } from "../data/initialState";
 
-const Result = () => {
+const Result = ({ mbtiResultList }) => {
   // logic
+  const [resultData, setResultData] = useState(initialMbtiResultData); // ENFP데이터
+
+  useEffect(() => {
+    // 1. expected output [E, S, F, P]
+    const mbti = mbtiResultList
+      .map((item) =>
+        item.resultValue[item.firstType] > 1 ? item.firstType : item.lastType
+      )
+      .join(""); // 2. expected output "ESFP"
+    console.log("🚀~ mbti:", mbti);
+    const targetItem = mbtiResultDataList.find((item) => item.type === mbti);
+    targetItem && setResultData(targetItem);
+  }, [mbtiResultList]);
 
   // view
   return (
@@ -50,12 +65,12 @@ const Result = () => {
       {/* END: 로고 텍스트 */}
       <div className="py-4">
         {/* START: Score 컴포넌트 */}
-        <Score />
+        <Score number={resultData.score} />
         {/* END: Score 컴포넌트 */}
       </div>
       <div className="py-4">
         {/* START: LoveIndex 컴포넌트 */}
-        <LoveIndex />
+        <LoveIndex list={resultData.loveIndexList} />
         {/* END: LoveIndex 컴포넌트 */}
       </div>
       <div className="py-4">

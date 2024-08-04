@@ -6,7 +6,7 @@ import { mbtiAnswerList, mbtiQuestionList } from "../data/response";
 import { useNavigate } from "react-router-dom";
 import Progress from "../components/Progress";
 
-const Test = () => {
+const Test = ({ onMovePage }) => {
   // logic
   const totalStep = 12;
   const history = useNavigate();
@@ -15,25 +15,75 @@ const Test = () => {
   const [mbtiQuestion, setMbtiQuestion] = useState(initialMbtiQuestion);
   const [mbtiAnswer, setMbtiAnswer] = useState(initialMbtiAnswer);
 
+  const [mbtiResultList, setMbtiResultList] = useState([]);
+
   const { step, questionText } = mbtiQuestion;
 
-  const hanleAnswerClick = () => {
+  const hanleAnswerClick = (selectedItem) => {
     // 12까지만 증가하고 12일때는 증가 안함
     setCurrentStep(currentStep + 1);
 
     // TODO: mbtiResult 담기
 
-    // 1. mbtiResultList에 첫 데이터 추가
-    // 2. 담긴 mbtiReulstList중에 이미 존재하는 questionType이 있는지 체크
+    // 1. mbtiResultList에 첫 데이터 추가 - 완료
+    // 2. 담긴 mbtiReulstList중에 이미 존재하는 questionType이 있는지 체크 - 완료
     // 3. 체크한 값이 true: resultValue의 [firstType]의 값을
-    // 4. 체크한 값이 false: mbtiReulstList에 객체 추가
+    // 4. 체크한 값이 false: mbtiReulstList에 객체 추가 - 완료
+
+    const { firstType, lastType, questionType } = mbtiQuestion;
+
+    const existItem = mbtiResultList.find(
+      (item) => item.questionType === questionType
+    );
+
+    if (existItem) {
+      // 같은 questionType이 존재 하는경우
+      setMbtiResultList((prev) =>
+        prev.map((item) => {
+          return item.questionType === questionType
+            ? {
+                ...item,
+                resultValue: {
+                  [firstType]:
+                    firstType === selectedItem.type
+                      ? item.resultValue[firstType] + 1
+                      : item.resultValue[firstType],
+                },
+              }
+            : item;
+        })
+      );
+    } else {
+      // 같은 questionType이 존재하지 않는 경우
+      initMbtiResultList(firstType, lastType, questionType, selectedItem);
+    }
+  };
+
+  const initMbtiResultList = (
+    firstType,
+    lastType,
+    questionType,
+    selectedItem
+  ) => {
+    setMbtiResultList((prev) => [
+      ...prev,
+      {
+        firstType,
+        lastType,
+        questionType,
+        resultValue: {
+          [firstType]: selectedItem.type === firstType ? 1 : 0,
+        },
+      },
+    ]);
   };
 
   const goResult = useCallback(() => {
     history("/result");
 
     //TODO: onMovePage시 mbtiResultList데이터 보내기
-  }, [history]);
+    onMovePage(mbtiResultList);
+  }, [history, mbtiResultList, onMovePage]);
 
   useEffect(() => {
     currentStep > totalStep && goResult();
@@ -41,7 +91,6 @@ const Test = () => {
 
   // 1. 원하는 state 감시
   useEffect(() => {
-    console.log("current", currentStep);
     // state 변경시 실행될 실행문
     const nextQuestion = mbtiQuestionList.find(
       (item) => item.step === currentStep
